@@ -1,0 +1,13 @@
+# The stream is part of the application's desired state, so it ships with the app.
+apiVersion: jetstream.nats.io/v1beta2
+kind: Stream
+metadata:
+  name: orders
+  namespace: nats
+spec:
+  name: ORDERS
+  subjects: ["orders.>"]
+  storage: file
+  replicas: 3
+  retention: limits
+  maxAge: 24h

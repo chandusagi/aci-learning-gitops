@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: orders-worker, namespace: orders}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: orders-worker}}
+  template:
+    metadata: {labels: {app: orders-worker}}
+    spec:
+      securityContext: {runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      containers:
+        - name: worker
+          image: orders-worker:lab
+          imagePullPolicy: IfNotPresent
+          env: [{name: NATS_URL, value: "nats://nats.nats.svc:4222"}]
+          ports: [{containerPort: 8081}]
+          resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {memory: 128Mi}}
+          securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"]}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: orders-worker, namespace: orders}
+spec:
+  selector: {app: orders-worker}
+  ports: [{port: 80, targetPort: 8081}]
